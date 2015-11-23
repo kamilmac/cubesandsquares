@@ -8,28 +8,24 @@ import (
     "html/template"
     "time"
     "strings"
+    "encoding/json"
+
     "github.com/julienschmidt/httprouter"
 	"github.com/boltdb/bolt"
     "github.com/satori/go.uuid"
-
-    // ADD BOLTDB
 )
-
-// WRITE BOLTDB HANDLER
-// put, get, getAll, delete, openDb
-
-// Write uuid handler
-
-// Create dummy prints obj
 
 type (
     print struct {
-        Id string       "json:'id'"   
-        File string     "json:'file'"
-        Title string    "json:'title'"
+        Id []byte       "json:'id'"   
+        File []byte     "json:'file'"
+        Title []byte    "json:'title'"
     }
 )
+
 const DB_PATH string = "cubes.db"
+const PASSWORD string = "123"
+
 var db *bolt.DB
 
 
@@ -59,6 +55,16 @@ func put(bucket, id, value []byte) {
 		log.Fatal(err)
 	}
 }
+
+func savePrint(pass string, p print) {
+    if pass == PASSWORD {
+        p.Id = getUid()
+        json, _ := json.Marshal(p)
+        put([]byte("prints"), p.Id, json)
+    } else {
+        fmt.Println("Invalid password.")
+    }
+} 
 
 func getAll(bucket []byte) (response string){
 	result := []string{}
