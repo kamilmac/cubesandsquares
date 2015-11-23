@@ -1,0 +1,18 @@
+{{define "layout"}}
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{template "title"}}</title>
+		<link rel="stylesheet" href="/static/css/normalize.css">
+		<link rel="stylesheet" href="/static/css/skeleton.css">
+		<link rel="stylesheet" href="/static/css/main.css">
+	</head>
+	<body>
+		<header>
+			<h1>Cubes and Squares</h1>
+		</header>
+		{{template "content"}}
+	</body>
+</html>
+{{end}}
