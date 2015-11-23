@@ -6,83 +6,17 @@ import (
     "path"
     "net/http"
     "html/template"
-    "time"
-    "strings"
-    "encoding/json"
 
     "github.com/julienschmidt/httprouter"
 	"github.com/boltdb/bolt"
-    "github.com/satori/go.uuid"
 )
 
-type (
-    print struct {
-        Id []byte       "json:'id'"   
-        File []byte     "json:'file'"
-        Title []byte    "json:'title'"
-    }
+const (
+    DB_PATH string = "cubes.db"
+    PASSWORD string = "123"
 )
-
-const DB_PATH string = "cubes.db"
-const PASSWORD string = "123"
 
 var db *bolt.DB
-
-
-
-func getUid() (id []byte) {
-    return uuid.NewV4().Bytes()
-}
-
-func openDb(path string) (DB *bolt.DB) {
-	DB, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return
-}
-
-func put(bucket, id, value []byte) {
-    err := db.Update(func(tx *bolt.Tx) error {
-        b, err := tx.CreateBucketIfNotExists(bucket)
-        if err != nil {
-            return fmt.Errorf("create bucket: %s", err)
-        }
-        b.Put([]byte(id), value)
-        return nil
-    })
-    if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func savePrint(pass string, p print) {
-    if pass == PASSWORD {
-        p.Id = getUid()
-        json, _ := json.Marshal(p)
-        put([]byte("prints"), p.Id, json)
-    } else {
-        fmt.Println("Invalid password.")
-    }
-} 
-
-func getAll(bucket []byte) (response string){
-	result := []string{}
-	db.View(func(tx *bolt.Tx) error {
-	    b := tx.Bucket([]byte(bucket))
-	    b.ForEach(func(k, v []byte) error {
-			result = append(result, fmt.Sprintf("\"%s\": %s", k, v))
-	        return nil
-	    })
-	    return nil
-	})
-	response = fmt.Sprintf("{%s}", (strings.Join(result, ",")))
-	return
-}
-
-
-
-
 
 func main() {
     db = openDb(DB_PATH)
