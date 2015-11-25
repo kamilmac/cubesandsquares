@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch server.go",
+			"type": "go",
+			"request": "launch",
+			"program": ".",
+			"stopOnEntry": false,
+			"env": {},
+			"args": [],
+			"cwd": "."
+		}
+	]
+}

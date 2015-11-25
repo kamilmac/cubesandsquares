@@ -6,7 +6,6 @@ import (
     "path"
     "net/http"
     "html/template"
-
     "github.com/julienschmidt/httprouter"
 	"github.com/boltdb/bolt"
 )
@@ -38,7 +37,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func printHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     fmt.Fprintln(w, "Print: ", ps.ByName("printId"))
-    
 }
 
 func adminHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

@@ -1,11 +1,10 @@
-package db
+package main
 
 import (
     "fmt"
     "log"
     "time"
     "github.com/satori/go.uuid"
-
 	"github.com/boltdb/bolt"
 )
 
@@ -33,6 +32,15 @@ func put(bucket, id, value []byte) {
     if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func get(bucket, key []byte) (v []byte) {
+    db.View(func(tx *bolt.Tx) error {
+	    b := tx.Bucket(bucket)
+        v = b.Get(key)
+	    return nil
+	})
+	return
 }
 
 func getAll(bucket []byte) (list [][]byte){
