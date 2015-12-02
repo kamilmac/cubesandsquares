@@ -8,8 +8,8 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-func getUid() (id []byte) {
-    return uuid.NewV4().Bytes()
+func getUid() (id string) {
+    return uuid.NewV4().String()
 }
 
 func openDb(path string) (DB *bolt.DB) {
@@ -20,13 +20,13 @@ func openDb(path string) (DB *bolt.DB) {
 	return
 }
 
-func put(bucket, id, value []byte) {
+func put(bucket string, id string, value []byte) {
     err := db.Update(func(tx *bolt.Tx) error {
-        b, err := tx.CreateBucketIfNotExists(bucket)
+        b, err := tx.CreateBucketIfNotExists([]byte(bucket))
         if err != nil {
             return fmt.Errorf("create bucket: %s", err)
         }
-        b.Put([]byte(id), value)
+        b.Put([]byte(id), []byte(value))
         return nil
     })
     if err != nil {
@@ -34,20 +34,30 @@ func put(bucket, id, value []byte) {
 	}
 }
 
-func get(bucket, key []byte) (v []byte) {
+func get(bucket, key string) (v []byte) {
     db.View(func(tx *bolt.Tx) error {
-	    b := tx.Bucket(bucket)
-        v = b.Get(key)
+	    b := tx.Bucket([]byte(bucket))
+        v = b.Get([]byte(key))
 	    return nil
 	})
 	return
 }
 
-func getAll(bucket []byte) (list [][]byte){
+func delete(bucket, key string) {
+    db.Update(func(tx *bolt.Tx) error {
+        b := tx.Bucket([]byte(bucket))
+        b.Delete([]byte(key))
+        return nil
+    })
+}
+
+func getAll(bucket string) (list []string){
 	db.View(func(tx *bolt.Tx) error {
 	    b := tx.Bucket([]byte(bucket))
+
 	    b.ForEach(func(k, v []byte) error {
-            list = append(list, v)
+            
+            list = append(list, string(v))
 	        return nil
 	    })
 	    return nil

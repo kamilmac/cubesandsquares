@@ -7,37 +7,49 @@ import (
 
 type (
     Print struct {
-        Id []byte       `json:"id"`  
-        File []byte     `json:"file"`
-        Title []byte    `json:"title"`
+        Id string       `json:"id"`  
+        File string     `json:"file"`
+        Title string    `json:"title"`
     }
     Prints []Print
 )
 
-func (p Print) savePrint(pass string) []byte {
-    if pass == PASSWORD {
+func (p Print) savePrint(pass string) string {
+    if valid(pass) {
         p.Id = getUid()
         j, _ := json.Marshal(p)
-        put([]byte("prints"), p.Id, j)
-    } else {
-        fmt.Println("Invalid password.")
+        put("prints", p.Id, j)
     }
     return p.Id
-} 
+}
 
 func getAllPrints() (allPrints Prints) {
-    list := getAll([]byte("prints"))
+    list := getAll("prints")
+    p := Print{}
+
     for _, v := range list {
-        p := Print{}
-        json.Unmarshal(v, p)
+        json.Unmarshal([]byte(v), &p)
         allPrints = append(allPrints, p)
-        return nil
     }
     return
 }
 
-func getPrint(id []byte) (p Print) {
-    v := get([]byte("prints"), id)
+func getPrint(id string) (p Print) {
+    v := get("prints", id)
     json.Unmarshal(v, &p)
     return
+}
+
+func deletePrint(id, pass string) {
+    if valid(pass) {
+        delete("prints", id)
+    }
+}
+
+func valid(pass string) bool {
+    if pass != PASSWORD {
+        fmt.Println("Invalid password.")
+        return false    
+    }
+    return true
 }
