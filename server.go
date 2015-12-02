@@ -33,9 +33,16 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	prints := getAllPrints()
+	varmap := map[string]interface{}{
+		"var1": "value",
+		"var2": 100,
+	}
+	
 	tmpl := serveContent("index.html")
-	tmpl.ExecuteTemplate(w, "layout", prints)
+	
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	tmpl.ExecuteTemplate(w, "layout", varmap)
+	tmpl.Execute(w, nil)
 }
 
 func printHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
