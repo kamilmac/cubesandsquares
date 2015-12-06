@@ -1,0 +1,10 @@
+{{define "title"}}Print{{end}}
+
+{{define "content"}}
+<section id="content">
+	<figure>
+		<img src="{{ .File }}" alt="{{ .Title }}">
+		<figcaption>{{ .Id }}</figcaption>
+	</figure>
+</section>
+{{end}}

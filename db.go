@@ -52,14 +52,17 @@ func delete(bucket, key string) {
 }
 
 func getAll(bucket string) (list []string){
-	db.View(func(tx *bolt.Tx) error {
-	    b := tx.Bucket([]byte(bucket))
+    db.View(func(tx *bolt.Tx) error {
 
-	    b.ForEach(func(k, v []byte) error {
-            
-            list = append(list, string(v))
-	        return nil
-	    })
+	    b := tx.Bucket([]byte(bucket))
+        
+        if(b != nil) {
+            b.ForEach(func(k, v []byte) error {
+                list = append(list, string(v))
+                return nil
+            })
+        }
+        
 	    return nil
 	})
 	return

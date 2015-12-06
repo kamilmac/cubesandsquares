@@ -26,7 +26,6 @@ func (p Print) savePrint(pass string) string {
 func getAllPrints() (allPrints Prints) {
     list := getAll("prints")
     p := Print{}
-
     for _, v := range list {
         json.Unmarshal([]byte(v), &p)
         allPrints = append(allPrints, p)

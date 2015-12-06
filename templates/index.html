@@ -2,30 +2,15 @@
 
 {{define "content"}}
 <section id="content">
-	{{.}}
+	
+	{{$gdriveurl := .gdriveurl}}
+	
+	{{ range $key, $value := .prints }}
 	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
+		<img src="{{ $gdriveurl }}{{ $value.File }}" alt="{{ $value.Title }}">
+		<figcaption>{{ $value.Id }}</figcaption>
 	</figure>
-	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
-	</figure>
-	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
-	</figure>
-	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
-	</figure>
-	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
-	</figure>
-	<figure>
-		<img src="" alt="">
-		<figcaption></figcaption>
-	</figure>
+	{{ end }}
+	
 </section>
 {{end}}
