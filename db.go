@@ -51,7 +51,9 @@ func delete(bucket, key string) {
     })
 }
 
-func getAll(bucket string) (list []string){
+func getAll(bucket string) []string {
+    list := []string{}
+    
     db.View(func(tx *bolt.Tx) error {
 
 	    b := tx.Bucket([]byte(bucket))
@@ -62,8 +64,8 @@ func getAll(bucket string) (list []string){
                 return nil
             })
         }
-        
+        fmt.Println("list: ", list)
 	    return nil
 	})
-	return
+	return list
 }

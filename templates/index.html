@@ -2,15 +2,69 @@
 
 {{define "content"}}
 <section id="content">
-	
-	{{$gdriveurl := .gdriveurl}}
-	
-	{{ range $key, $value := .prints }}
-	<figure>
-		<img src="{{ $gdriveurl }}{{ $value.File }}" alt="{{ $value.Title }}">
-		<figcaption>{{ $value.Id }}</figcaption>
-	</figure>
-	{{ end }}
-	
+
 </section>
+
+
+<script>
+	var Cubes = {
+		cfg: {
+			gdriveurl: "{{ .gdriveurl }}",
+			prints: [
+				{{ range $key, $value := .prints }}
+					{
+						id: "{{ $value.Id }}",	
+						timestamp: "{{ $value.Timestamp }}",
+						file: "{{ $value.File }}",
+						title: "{{ $value.Title }}",	
+					},
+				{{ end }}
+			],
+		},
+		_set_attributes: function(elem, attributes) {
+			for (var attr in attributes) {
+				if (attributes.hasOwnProperty(attr)) {
+					elem.setAttribute(attr, attributes[attr]);
+				}
+			}
+		},
+		attach_prints_to: function(elem_id) {
+			var prints = this.cfg.prints,
+				content = document.getElementById(elem_id);
+				
+			for(var i = 0; i < prints.length; i++) {
+				var img = document.createElement("img");
+				this._set_attributes(img, {
+					src: this.cfg.gdriveurl + prints[i].file
+				})
+				content.appendChild(img);
+			}	
+			return this
+		},
+		sort: function() {
+			var prints = this.cfg.prints.slice(),
+				sorted = [];
+			
+			while(prints.length) {
+				var newest = 0;
+				for(var i = 1; i < prints.length; i++) {
+					if(prints[newest].timestamp < prints[i].timestamp) newest = i;
+				}
+				sorted.push(prints[newest]);
+				prints.splice(newest,1);
+			}
+			this.cfg.prints = sorted;
+			console.log(sorted)		
+			return this
+		},
+		display_title_on_print_hover: function() {
+			return this
+		}
+	};
+	
+	Cubes
+		.sort()
+		.attach_prints_to("content")
+		.display_title_on_print_hover();
+</script>
 {{end}}

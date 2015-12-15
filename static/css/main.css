@@ -1,13 +1,40 @@
 body, html {
-	
 }
 body header {
 
 }
 #content {
-	
+	max-width: 800px;
+	margin: 0 auto;
 }
 
+#content img {
+	width: 100%;
+	max-width: 800px;
+	margin-top: 30px;
+	border-radius: 3px;
+}
+
+#admin_section {
+	margin-left: 100px;
+}
+
+#admin_content img {
+	display: block;
+	width: 100%;
+	max-width: 150px;
+	margin-bottom: 10px;
+	border-radius: 3px;
+}
+
+header h1 {
+	font-size: 26px;
+	margin: 10px 20px 20px 10px;
+}
+
+li {
+	display: inline;
+}
 
 /* Media Queries
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

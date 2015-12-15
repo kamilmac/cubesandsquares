@@ -3,34 +3,41 @@ package main
 import (
     "fmt"
     "encoding/json"
+    "time"
 )
 
 type (
     Print struct {
-        Id string       `json:"id"`  
-        File string     `json:"file"`
-        Title string    `json:"title"`
+        Id string           `json:"id"`  
+        Timestamp int32     `json:"timestamp"`
+        File string         `json:"file"`
+        Title string        `json:"title"`
     }
     Prints []Print
 )
 
-func (p Print) savePrint(pass string) string {
+func (p *Print) savePrint(pass string) bool {
     if valid(pass) {
         p.Id = getUid()
+        p.Timestamp = int32(time.Now().Unix())
         j, _ := json.Marshal(p)
         put("prints", p.Id, j)
+        return true
     }
-    return p.Id
+    return false
 }
 
-func getAllPrints() (allPrints Prints) {
+func getAllPrints() Prints {
+    var allPrints Prints
+    
     list := getAll("prints")
     p := Print{}
     for _, v := range list {
         json.Unmarshal([]byte(v), &p)
         allPrints = append(allPrints, p)
     }
-    return
+
+    return allPrints
 }
 
 func getPrint(id string) (p Print) {
@@ -39,10 +46,13 @@ func getPrint(id string) (p Print) {
     return
 }
 
-func deletePrint(id, pass string) {
+func deletePrint(id, pass string) bool {
     if valid(pass) {
+        fmt.Println("ID: ", id)
         delete("prints", id)
+        return true
     }
+    return false
 }
 
 func valid(pass string) bool {

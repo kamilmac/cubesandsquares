@@ -1,13 +1,15 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"log"
 	"net/http"
 	"path"
+	"encoding/json"
+	// "io/ioutil"
 )
 
 const (
@@ -28,6 +30,7 @@ func main() {
 	router.GET("/print/:printId", printHandler)
 	router.GET("/admin", adminHandler)
 	router.POST("/addprint", addPrintHandler)
+	router.POST("/delprint", delPrintHandler)
 
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
@@ -37,8 +40,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		"prints": getAllPrints(),
 		"gdriveurl": gDriveURL,
 	}
-	
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl := serveContent("index.html")
 	tmpl.ExecuteTemplate(w, "layout", data)
 }
@@ -47,8 +48,6 @@ func printHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	data := map[string]interface{}{
 		"prints": getPrint(string(ps.ByName("printId"))),
 	}
-	
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl := serveContent("print.html")
 	tmpl.ExecuteTemplate(w, "layout", data)
 }
@@ -56,18 +55,41 @@ func printHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 func adminHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := map[string]interface{}{
 		"prints": getAllPrints(),
+		"gdriveurl": gDriveURL,
 	}
-	
 	tmpl := serveContent("admin.html")
 	tmpl.ExecuteTemplate(w, "layout", data)
 }
 
 func addPrintHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
-	file := r.FormValue("file")
-	title := r.FormValue("title")
-	p := Print{"", file, title}
-	p.savePrint("123")
+	// body, _ := ioutil.ReadAll(r.Body)
+	decoder := json.NewDecoder(r.Body)
+	
+	var print struct {
+		Password string
+		Title string
+		File string
+	}
+    decoder.Decode(&print)
+	p := Print{"", 0, print.File, print.Title}
+	success := p.savePrint(print.Password)
+	
+	json.NewEncoder(w).Encode(p)
+	fmt.Fprintf(w, "%b", success)
+	
+}
+
+func delPrintHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	decoder := json.NewDecoder(r.Body)
+	
+	var print struct {
+		Password string
+		Id string
+	}
+    decoder.Decode(&print)
+	success := deletePrint(print.Id, print.Password)
+	
+	fmt.Fprintf(w, "%b", success)
 }
 
 func serveContent(file string) (tmpl *template.Template) {

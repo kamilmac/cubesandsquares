@@ -1,9 +1,163 @@
 {{define "title"}}Cubes and Squares{{end}}
 
 {{define "content"}}
-	<form action="/addprint" method="post">
+	<!--<form action="/addprint" method="post">
+		<input name="password" value="password">
 		<input name="file" value="file">
 		<input name="title" value="title">
 		<button>Add print</button>
-	</form>
+	</form>-->
+	<div id="admin_section">
+		<div>
+			<input type="password" id="password">
+		</div>
+	
+		<div>
+			<input placeholder="Title" type="text" id="title">
+			<input placeholder="Filename" type="text" id="file">
+			<button onclick="Cubes.add_print()">Add print</button>
+		</div>
+		
+		<hr>
+		
+		<ul id="admin_content">
+		</ul>
+	</div>
+	
+	<script>
+	var Cubes = {
+		cfg: {
+			gdriveurl: "{{ .gdriveurl }}",
+			prints: [
+				{{ range $key, $value := .prints }}
+					{
+						id: "{{ $value.Id }}",	
+						timestamp: "{{ $value.Timestamp }}",
+						file: "{{ $value.File }}",
+						title: "{{ $value.Title }}",	
+					},
+				{{ end }}
+			],
+		},
+		_set_attributes: function(elem, attributes) {
+			for (var attr in attributes) {
+				if (attributes.hasOwnProperty(attr)) {
+					elem.setAttribute(attr, attributes[attr]);
+				}
+			}
+		},
+		attach_prints_to: function(elem_id) {
+			var prints = this.cfg.prints,
+				container = document.getElementById(elem_id);
+				
+			for(var i = 0; i < prints.length; i++) {
+				var li = this.create_print_elem(prints[i])
+				container.appendChild(li);
+			}	
+			return this
+		},
+		_delete_print_elem: function(print_id) {
+			var print = document.getElementById("print_" + print_id);
+			print.parentNode.removeChild(print);
+		},
+		delete_print: function(print_id) {
+			var xhr = new XMLHttpRequest(),
+				password = document.getElementById("password").value,
+				id = print_id;
+			
+			xhr.open('POST', '/delprint');
+			xhr.setRequestHeader("Content-type", "application/json");
+			var data = JSON.stringify({
+				password: password,
+				id: id,
+			});
+			var that = this;
+			xhr.onreadystatechange = function () {
+				var DONE = 4; // readyState 4 means the request is done.
+				var OK = 200; // status 200 is a successful return.
+				if (xhr.readyState === DONE) {
+					if (xhr.status === OK) {
+						Cubes._delete_print_elem(print_id);
+						console.log("removing print ID: ", print_id);
+					} else {
+						console.log('Error: ' + xhr.status); // An error occurred during the request.
+					}
+				}
+			};
+			xhr.send(data);
+		},
+		create_print_elem: function(print) {
+			var li = document.createElement("li"),
+				img = document.createElement("img"),
+				button = document.createElement("button"),
+				button_text = document.createTextNode("Delete print");
+			
+			this._set_attributes(img, {
+				src: this.cfg.gdriveurl + print.file,
+				class: "micro"
+			});
+			
+			this._set_attributes(li, {
+				id: "print_" + print.id,
+			});
+			
+			this._set_attributes(button, {
+				onclick: "Cubes.delete_print('" + print.id + "')"
+			});
+			
+			button.appendChild(button_text);
+			li.appendChild(img);
+			li.appendChild(button);
+			return li
+		},
+		add_print: function() {
+			var xhr = new XMLHttpRequest(),
+				password = document.getElementById("password").value,
+				title = document.getElementById("title").value,
+				file = document.getElementById("file").value;
+			
+			xhr.open('POST', '/addprint');
+			xhr.setRequestHeader("Content-type", "application/json");
+			var data = JSON.stringify({
+				password: password,
+				title: title,
+				file: file,
+			});
+			var that = this;
+			xhr.onreadystatechange = function () {
+				var DONE = 4; // readyState 4 means the request is done.
+				var OK = 200; // status 200 is a successful return.
+				if (xhr.readyState === DONE) {
+					if (xhr.status === OK) {
+						var print = xhr.responseText;
+						console.log(that.create_print_elem(JSON.parse(print)));
+					} else {
+						console.log('Error: ' + xhr.status); // An error occurred during the request.
+					}
+				}
+			};
+			xhr.send(data);
+		},
+		sort: function() {
+			var prints = this.cfg.prints.slice(),
+				sorted = [];
+			
+			while(prints.length) {
+				var newest = 0;
+				for(var i = 1; i < prints.length; i++) {
+					if(prints[newest].timestamp < prints[i].timestamp) newest = i;
+				}
+				sorted.push(prints[newest]);
+				prints.splice(newest,1);
+			}
+			this.cfg.prints = sorted;
+			console.log(sorted)		
+			return this
+		}
+	};
+	
+	Cubes
+		.sort()
+		.attach_prints_to("admin_content");
+</script>
 {{end}}
