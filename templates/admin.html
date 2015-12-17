@@ -47,12 +47,13 @@
 			}
 		},
 		attach_prints_to: function(elem_id) {
-			var prints = this.cfg.prints,
-				container = document.getElementById(elem_id);
+			var prints = this.cfg.prints;
+				
+			Cubes.cfg.container = document.getElementById(elem_id);
 				
 			for(var i = 0; i < prints.length; i++) {
 				var li = this.create_print_elem(prints[i])
-				container.appendChild(li);
+				Cubes.cfg.container.appendChild(li);
 			}	
 			return this
 		},
@@ -77,10 +78,12 @@
 				var OK = 200; // status 200 is a successful return.
 				if (xhr.readyState === DONE) {
 					if (xhr.status === OK) {
-						Cubes._delete_print_elem(print_id);
-						console.log("removing print ID: ", print_id);
+						var resp = JSON.parse(xhr.responseText);
+						if(resp.Success) {
+							Cubes._delete_print_elem(print_id);
+						}
 					} else {
-						console.log('Error: ' + xhr.status); // An error occurred during the request.
+						console.log('Error: ' + xhr.status);
 					}
 				}
 			};
@@ -118,25 +121,35 @@
 			
 			xhr.open('POST', '/addprint');
 			xhr.setRequestHeader("Content-type", "application/json");
+			
+			if(!password || !title || !file) return;
+			
 			var data = JSON.stringify({
 				password: password,
 				title: title,
 				file: file,
 			});
+			
 			var that = this;
 			xhr.onreadystatechange = function () {
 				var DONE = 4; // readyState 4 means the request is done.
 				var OK = 200; // status 200 is a successful return.
 				if (xhr.readyState === DONE) {
 					if (xhr.status === OK) {
-						var print = xhr.responseText;
-						console.log(that.create_print_elem(JSON.parse(print)));
+						var print = JSON.parse(xhr.responseText);
+						if(print.id) {
+							var li = that.create_print_elem(print);
+							Cubes._prepend(li);
+						}
 					} else {
 						console.log('Error: ' + xhr.status); // An error occurred during the request.
 					}
 				}
 			};
 			xhr.send(data);
+		},
+		_prepend: function(elem) {
+			Cubes.cfg.container.insertBefore(elem, Cubes.cfg.container.firstChild);
 		},
 		sort: function() {
 			var prints = this.cfg.prints.slice(),

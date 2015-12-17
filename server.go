@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/boltdb/bolt"
 	"github.com/julienschmidt/httprouter"
 	"html/template"
@@ -72,24 +72,30 @@ func addPrintHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	}
     decoder.Decode(&print)
 	p := Print{"", 0, print.File, print.Title}
-	success := p.savePrint(print.Password)
+	p.savePrint(print.Password)
 	
 	json.NewEncoder(w).Encode(p)
-	fmt.Fprintf(w, "%b", success)
-	
 }
 
 func delPrintHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	success := false
 	decoder := json.NewDecoder(r.Body)
 	
 	var print struct {
 		Password string
 		Id string
 	}
-    decoder.Decode(&print)
-	success := deletePrint(print.Id, print.Password)
 	
-	fmt.Fprintf(w, "%b", success)
+    decoder.Decode(&print)
+	success = deletePrint(print.Id, print.Password)
+	
+	response := struct {
+		Success bool
+	}{
+		success,
+	}
+	
+	json.NewEncoder(w).Encode(response)
 }
 
 func serveContent(file string) (tmpl *template.Template) {
